@@ -1,0 +1,16 @@
+{
+  "Vue3 SFC 代码结构一键生成": {
+    "prefix": "Vue3 SFC",
+    "body": [
+      "<script setup lang=\"ts\"></script>\n",
+      "<template>",
+      "\t<div>",
+      "\t\t...",
+      "\t</div>",
+      "</template>\n",
+      "<style scoped></style>",
+      "$1"
+    ],
+    "description": "Vue3 SFC"
+  }
+}
