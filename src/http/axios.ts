@@ -21,7 +21,6 @@ function createInstance() {
   // 响应拦截器（可根据具体业务作出相应的调整）
   instance.interceptors.response.use(
     (response) => {
-      console.log("%c [ response ]-26-「axios.ts」", "font-size:13px; background:#9f2b0e; color:#e36f52;", response)
       // apiData 是 api 返回的数据
       const apiData = response.data
       // 二进制数据则直接返回

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { LoginRequestData } from "./apis/type"
-import Description from "@@/components/Description.vue"
 import { setClinetMachineGuid } from "@/common/utils/cache/cookies"
 import { getCaptchaApi, loginApi } from "./apis"
 
@@ -16,10 +15,13 @@ const loginFormData: LoginRequestData = reactive({
 })
 
 onMounted(async () => {
+  getCaptcha()
+})
+async function getCaptcha() {
   const vHeadRand = String(10000 * Math.random()).substring(0, 4)
   const { Data } = await getCaptchaApi({ captchaId: vHeadRand })
   captchaImage.value = Data.Img
-})
+}
 
 function onSubmit() {
   loading.value = true
@@ -27,7 +29,7 @@ function onSubmit() {
     setClinetMachineGuid(Data.Guid)
     router.push("/")
   }).catch(() => {
-    loginFormData.Password = ""
+    getCaptcha()
   }).finally(() => {
     loading.value = false
   })
@@ -36,7 +38,6 @@ function onSubmit() {
 
 <template>
   <div un-h-full un-flex-center un-flex-col un-select-none>
-    <Description un-mb-20px />
     <van-form @submit="onSubmit">
       <van-cell-group inset>
         <van-field

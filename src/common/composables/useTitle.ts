@@ -1,5 +1,5 @@
 /** 项目标题 */
-const VITE_APP_TITLE = import.meta.env.VITE_APP_TITLE ?? "MobVue"
+const VITE_APP_TITLE = import.meta.env.VITE_APP_TITLE ?? "Admin"
 
 /** 动态标题 */
 const dynamicTitle = ref<string>("")
