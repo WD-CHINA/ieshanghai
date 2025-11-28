@@ -1,11 +1,7 @@
 import type { AxiosInstance, AxiosRequestConfig } from "axios"
 import axios from "axios"
-import { get, merge } from "lodash-es"
-
-/** 退出登录并强制刷新页面（会重定向到登录页） */
-function logout() {
-  location.reload()
-}
+import { merge } from "lodash-es"
+import { getH5SiteSession, removeH5SiteSession } from "@/common/utils/cache/cookies"
 
 /** 创建请求实例 */
 function createInstance() {
@@ -14,7 +10,13 @@ function createInstance() {
   // 请求拦截器
   instance.interceptors.request.use(
     // 发送之前
-    config => config,
+    (config) => {
+      const h5SiteSession = getH5SiteSession()
+      if (h5SiteSession) {
+        config.headers.set("s-auth-session", h5SiteSession)
+      }
+      return config
+    },
     // 发送失败
     error => Promise.reject(error)
   )
@@ -34,58 +36,16 @@ function createInstance() {
       }
       switch (IsSuccess) {
         case true:
-          // 本系统采用 code === 0 来表示没有业务错误
           return apiData
-
-        case 401:
-          // 登录过期
-          return logout()
+        case false:
+          removeH5SiteSession()
+          return Promise.reject(apiData)
         default:
           // 不是正确的 code
           return Promise.reject(new Error(apiData.message || "Error"))
       }
     },
     (error) => {
-      // status 是 HTTP 状态码
-      const status = get(error, "response.status")
-      const message = get(error, "response.data.message")
-      switch (status) {
-        case 400:
-          error.message = "请求错误"
-          break
-        case 401:
-          // 登录过期
-          error.message = message || "登录过期"
-          logout()
-          break
-        case 403:
-          error.message = message || "拒绝访问"
-          break
-        case 404:
-          error.message = "请求地址出错"
-          break
-        case 408:
-          error.message = "请求超时"
-          break
-        case 500:
-          error.message = "服务器内部错误"
-          break
-        case 501:
-          error.message = "服务未实现"
-          break
-        case 502:
-          error.message = "网关错误"
-          break
-        case 503:
-          error.message = "服务不可用"
-          break
-        case 504:
-          error.message = "网关超时"
-          break
-        case 505:
-          error.message = "HTTP 版本不受支持"
-          break
-      }
       return Promise.reject(error)
     }
   )
@@ -101,7 +61,6 @@ function createRequest(instance: AxiosInstance) {
       baseURL: import.meta.env.VITE_BASE_URL,
       // 请求头
       headers: {
-        // 携带 Token
         "Content-Type": "application/json"
       },
       // 请求体

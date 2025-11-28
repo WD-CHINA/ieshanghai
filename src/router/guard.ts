@@ -1,6 +1,6 @@
 import type { Router } from "vue-router"
 import { useTitle } from "@@/composables/useTitle"
-import { getClinetMachineGuid } from "@@/utils/cache/cookies"
+import { getH5SiteSession } from "@@/utils/cache/cookies"
 import NProgress from "nprogress"
 import { useKeepAliveStore } from "@/pinia/stores/keep-alive"
 import { isWhiteList } from "@/router/whitelist"
@@ -16,7 +16,7 @@ export function registerNavigationGuard(router: Router) {
   router.beforeEach((to, _from) => {
     NProgress.start()
     // 如果没有登录
-    if (!getClinetMachineGuid()) {
+    if (!getH5SiteSession()) {
       // 如果在免登录的白名单中，则直接进入
       if (isWhiteList(to)) return true
       // 其他没有访问权限的页面将被重定向到登录页面

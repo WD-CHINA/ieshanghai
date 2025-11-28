@@ -2,5 +2,5 @@
 export class CacheKey {
   static readonly TOKEN = `TOKEN`
   static readonly IS_DARK = `IS_DARK`
-  static readonly CLINET_MACHINE_GUID = `ClinetMachineGuid`
+  static readonly CLINET_MACHINE_GUID = `H5SiteSession`
 }

@@ -3,7 +3,7 @@ export interface LoginRequestData {
   Account: string
   /** 密码 */
   Password: string
-  ValidateCode: string
+  captchaVerifyParam: string
 }
 
 export type CaptchaResponseData = ApiResponseData<{ Img: string }>

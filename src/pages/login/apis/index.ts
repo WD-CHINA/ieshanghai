@@ -4,7 +4,7 @@ import { request } from "@/http/axios"
 /** 获取登录验证码 */
 export function getCaptchaApi(params: { captchaId: string }) {
   return request<Auth.CaptchaResponseData>({
-    url: `/api/Account.ReloadValidateCode/${params.captchaId}`,
+    url: `/Api/Account.ReloadValidateCode/${params.captchaId}`,
     method: "get"
   })
 }
@@ -12,7 +12,7 @@ export function getCaptchaApi(params: { captchaId: string }) {
 /** 登录并返回 Token */
 export function loginApi(data: Auth.LoginRequestData) {
   return request<Auth.LoginResponseData>({
-    url: "/api/Account.Login",
+    url: "/Api/H5Api.Account.Login",
     method: "post",
     data
   })

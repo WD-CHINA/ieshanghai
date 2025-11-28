@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
       open: true,
       // 反向代理
       proxy: {
-        "/api": {
+        "/Api": {
           target: "http://smelapi.ieshanghai.cn",
           // 是否为 WebSocket
           ws: false,
