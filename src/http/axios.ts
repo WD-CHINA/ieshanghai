@@ -1,12 +1,9 @@
 import type { AxiosInstance, AxiosRequestConfig } from "axios"
-import { getToken } from "@@/utils/cache/cookies"
 import axios from "axios"
 import { get, merge } from "lodash-es"
-import { useUserStore } from "@/pinia/stores/user"
 
 /** 退出登录并强制刷新页面（会重定向到登录页） */
 function logout() {
-  useUserStore().resetToken()
   location.reload()
 }
 
@@ -24,21 +21,23 @@ function createInstance() {
   // 响应拦截器（可根据具体业务作出相应的调整）
   instance.interceptors.response.use(
     (response) => {
+      console.log("%c [ response ]-26-「axios.ts」", "font-size:13px; background:#9f2b0e; color:#e36f52;", response)
       // apiData 是 api 返回的数据
       const apiData = response.data
       // 二进制数据则直接返回
       const responseType = response.request?.responseType
       if (responseType === "blob" || responseType === "arraybuffer") return apiData
       // 这个 code 是和后端约定的业务 code
-      const code = apiData.code
+      const IsSuccess = apiData.IsSuccess
       // 如果没有 code, 代表这不是项目后端开发的 api
-      if (code === undefined) {
+      if (IsSuccess === undefined) {
         return Promise.reject(new Error("非本系统的接口"))
       }
-      switch (code) {
-        case 0:
+      switch (IsSuccess) {
+        case true:
           // 本系统采用 code === 0 来表示没有业务错误
           return apiData
+
         case 401:
           // 登录过期
           return logout()
@@ -97,7 +96,6 @@ function createInstance() {
 /** 创建请求方法 */
 function createRequest(instance: AxiosInstance) {
   return <T>(config: AxiosRequestConfig): Promise<T> => {
-    const token = getToken()
     // 默认配置
     const defaultConfig: AxiosRequestConfig = {
       // 接口地址
@@ -105,7 +103,6 @@ function createRequest(instance: AxiosInstance) {
       // 请求头
       headers: {
         // 携带 Token
-        "Authorization": token ? `Bearer ${token}` : undefined,
         "Content-Type": "application/json"
       },
       // 请求体

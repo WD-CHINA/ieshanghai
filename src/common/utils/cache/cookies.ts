@@ -3,14 +3,10 @@
 import { CacheKey } from "@@/constants/cache-key"
 import Cookies from "js-cookie"
 
-export function getToken() {
-  return Cookies.get(CacheKey.TOKEN)
+export function setClinetMachineGuid(clinetMachineGuid: string) {
+  return Cookies.set(CacheKey.CLINET_MACHINE_GUID, clinetMachineGuid)
 }
 
-export function setToken(token: string) {
-  Cookies.set(CacheKey.TOKEN, token)
-}
-
-export function removeToken() {
-  Cookies.remove(CacheKey.TOKEN)
+export function getClinetMachineGuid() {
+  return Cookies.get(CacheKey.CLINET_MACHINE_GUID)
 }
