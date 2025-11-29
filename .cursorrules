@@ -1,0 +1,138 @@
+# 公共文化空间数字化运营平台 H5 管理端 - Cursor AI 规则
+
+## 项目概述
+这是一个基于 Vue 3 + TypeScript + Vite + Vant 的移动端管理系统，用于管理公共文化空间的活动排期和场地使用。
+
+## 技术栈
+- **框架**: Vue 3.5+ (Composition API + `<script setup>`)
+- **语言**: TypeScript 5.x
+- **构建工具**: Vite 7.x
+- **UI 组件库**: Vant 4.x
+- **状态管理**: Pinia 3.x
+- **路由**: Vue Router 4.x
+- **HTTP**: Axios 1.x
+- **样式**: UnoCSS (原子化 CSS)
+- **代码规范**: ESLint (@antfu/eslint-config)
+
+## 编码规范
+
+### 1. TypeScript
+- 优先使用 `interface` 定义对象类型
+- 为函数参数和返回值添加类型注解
+- API 类型定义使用 `ApiResponseData<T>` 泛型
+
+### 2. Vue 组件
+- 必须使用 `<script setup lang="ts">` 语法
+- 组件文件名使用 PascalCase (如: `NavBar.vue`)
+- 页面文件统一使用 `index.vue`
+- Props 和 Emits 使用 TypeScript 类型定义
+
+### 3. 命名规范
+- 变量/函数: camelCase (`userName`, `fetchData`)
+- 常量: UPPER_SNAKE_CASE (`API_BASE_URL`)
+- 类型/接口: PascalCase (`User`, `ActivityItem`)
+- 文件名(组件): PascalCase (`NavBar.vue`)
+- 文件名(工具): kebab-case (`datetime.ts`)
+
+### 4. 目录结构
+- 页面文件: `pages/[模块]/index.vue`
+- API 定义: `pages/[模块]/apis/index.ts`
+- 类型定义: `pages/[模块]/apis/type.ts`
+- 通用代码: `common/` (别名 `@@`)
+
+### 5. API 调用规范
+- 所有接口使用 POST 请求
+- 接口地址格式: `/Api/H5Api.[Module].[Method]`
+- 使用统一的 `request` 方法
+- 需要登录的接口自动携带 `s-auth-session` 请求头
+
+### 6. 响应数据格式
+```typescript
+interface ApiResponseData<T> {
+  Result: boolean    // true-成功, false-失败
+  Message: string    // 提示信息
+  NeedLogin?: boolean
+  Data?: T
+}
+```
+
+### 7. 日期格式
+- 日期: `YYYY-MM-DD`
+- 日期时间: `YYYY-MM-DD HH:mm:ss`
+- 使用 Day.js 进行日期处理
+
+### 8. 样式规范
+- 优先使用 UnoCSS 原子化类名
+- 组件样式使用 `<style scoped>`
+- 全局变量定义在 `common/assets/styles/variables.css`
+
+### 9. 状态管理
+- 使用 Pinia 组合式风格
+- Store 定义在 `pinia/stores/`
+- 提供 `Outside` 版本用于 setup 外使用
+
+### 10. 错误处理
+- 使用 try-catch 捕获异步错误
+- 使用 Vant 的 `showToast` 显示错误提示
+- 登录过期自动跳转登录页
+
+## 业务规则
+
+### 活动排期
+- 活动类型: 1-预约, 2-常规, 4-团队
+- 活动状态: 1-待审核, 2-待修改, 3-按计划, 4-已完成, 5-已下架, 6-已取消, 7-已作废
+- 同一场地同一时间只能有一个活动
+- 仅可编辑未开始的活动
+
+### 场地使用
+- 使用状态: 待审核, 已通过, 已拒绝
+- 同一场地同一时间只能有一个使用申请
+- 仅可编辑未开始的申请
+
+### 权限控制
+- 运营管理方: 管理所有场地 + 审核权限
+- 主理人: 仅管理负责场地
+
+## 开发建议
+
+### 页面开发
+1. 列表页: 使用 `van-list` + `van-pull-refresh`
+2. 详情页: 使用 `van-nav-bar` + 内容区域
+3. 表单页: 使用 `van-form` + `van-field`
+4. 使用 Vant 组件自动按需导入
+
+### 性能优化
+- 路由组件使用动态 import 懒加载
+- 图片使用 `van-image` 懒加载
+- 列表使用虚拟滚动 (大数据量)
+- 搜索/滚动使用防抖节流
+
+### 代码质量
+- 提交前运行 `pnpm lint` 检查代码
+- 遵循 ESLint 规则
+- 为公共函数添加 JSDoc 注释
+
+## 路径别名
+- `@` → `src/`
+- `@@` → `src/common/`
+
+## 环境信息
+- 开发端口: 3333
+- 接口域名: smelapi.ieshanghai.cn/Api/
+- 代理配置: `/Api` 转发到接口域名
+
+## 详细文档
+更多详细规范请查看 `.cursor/rules/` 目录下的文档：
+- `project-architecture.md` - 项目架构规范
+- `api-conventions.md` - API 接口规范
+- `coding-standards.md` - 代码规范
+- `business-requirements.md` - 业务需求概要
+- `component-development.md` - 组件开发规范
+
+## 注意事项
+1. 所有新增/编辑功能需要检查时间冲突
+2. 需要登录的接口失败时自动跳转登录页
+3. 移动端适配使用 viewport 和安全区域
+4. 生产环境必须使用 HTTPS
+5. 敏感信息不在前端存储
+

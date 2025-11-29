@@ -15,7 +15,7 @@ export default antfu(
       semi: false
     },
     // 忽略文件
-    ignores: []
+    ignores: ["node_modules", "dist", "public", ".cursor/**", ".vscode/**"]
   },
   {
     // 对所有文件都生效的规则
