@@ -2,8 +2,10 @@
 import type { ActivityItem } from "./apis/type"
 import { getActivityStatusTagType } from "@@/utils/vant-helper"
 import dayjs from "dayjs"
+import { showToast } from "vant"
 import { getActivityListApi } from "./apis"
 import ActivityFormDialog from "./components/ActivityFormDialog.vue"
+import FilterDialog from "./components/FilterDialog.vue"
 
 const router = useRouter()
 
@@ -17,17 +19,33 @@ const limit = 20
 
 // 筛选条件
 const keyword = ref("")
-const filterBeginTime = ref("")
-const filterEndTime = ref("")
-const filterBeginTimeArray = ref<string[]>([])
-const filterEndTimeArray = ref<string[]>([])
-const showFilterBeginTimePicker = ref(false)
-const showFilterEndTimePicker = ref(false)
+const filters = reactive({
+  SpaceId: 0,
+  FieldId: 0,
+  PlaceId: 0,
+  ServiceType: 0,
+  CanBook: 0,
+  BeginTime: "",
+  EndTime: ""
+})
+
+// 筛选弹窗
+const showFilterDialog = ref(false)
 
 // 表单弹窗
 const showFormDialog = ref(false)
 const formDialogMode = ref<"add" | "edit" | "view">("add")
 const formDialogData = ref<ActivityItem | null>(null)
+
+// 计算是否有筛选条件
+const hasActiveFilters = computed(() => {
+  return filters.FieldId !== 0
+    || filters.PlaceId !== 0
+    || filters.ServiceType !== 0
+    || filters.CanBook !== 0
+    || filters.BeginTime !== ""
+    || filters.EndTime !== ""
+})
 
 // 获取活动列表
 async function fetchActivityList(reset = false) {
@@ -42,14 +60,14 @@ async function fetchActivityList(reset = false) {
     }
 
     const { Data } = await getActivityListApi({
-      SpaceId: 0,
-      FieldId: 0,
-      PlaceId: 0,
-      ServiceType: 0,
-      CanBook: 0,
+      SpaceId: filters.SpaceId,
+      FieldId: filters.FieldId,
+      PlaceId: filters.PlaceId,
+      ServiceType: filters.ServiceType,
+      CanBook: filters.CanBook,
       Keyword: keyword.value,
-      BeginTime: filterBeginTime.value || dayjs().format("YYYY-MM-DD"),
-      EndTime: filterEndTime.value || dayjs().add(30, "day").format("YYYY-MM-DD"),
+      BeginTime: filters.BeginTime || dayjs().format("YYYY-MM-DD"),
+      EndTime: filters.EndTime || dayjs().add(30, "day").format("YYYY-MM-DD"),
       page: page.value,
       limit
     })
@@ -93,16 +111,26 @@ function handleSearch() {
   onRefresh()
 }
 
-// 日期选择确认
-function handleFilterBeginTimeConfirm(value: any) {
-  filterBeginTime.value = value.selectedValues.join("-")
-  showFilterBeginTimePicker.value = false
+// 打开筛选弹窗
+function openFilterDialog() {
+  showFilterDialog.value = true
+}
+
+// 筛选确认
+function handleFilterConfirm(newFilters: typeof filters) {
+  Object.assign(filters, newFilters)
   onRefresh()
 }
 
-function handleFilterEndTimeConfirm(value: any) {
-  filterEndTime.value = value.selectedValues.join("-")
-  showFilterEndTimePicker.value = false
+// 重置筛选
+function handleFilterReset() {
+  filters.SpaceId = 0
+  filters.FieldId = 0
+  filters.PlaceId = 0
+  filters.ServiceType = 0
+  filters.CanBook = 0
+  filters.BeginTime = ""
+  filters.EndTime = ""
   onRefresh()
 }
 
@@ -171,11 +199,19 @@ export default {
       @click-left="router.back()"
     >
       <template #right>
-        <van-icon
-          name="plus"
-          size="20"
-          @click="openSubmitDialog"
-        />
+        <div class="flex items-center gap-3">
+          <van-icon
+            name="filter-o"
+            size="20"
+            :class="{ 'text-blue-500': hasActiveFilters }"
+            @click="openFilterDialog"
+          />
+          <van-icon
+            name="plus"
+            size="20"
+            @click="openSubmitDialog"
+          />
+        </div>
       </template>
     </van-nav-bar>
 
@@ -189,25 +225,49 @@ export default {
       />
     </div>
 
-    <!-- 筛选条件 -->
-    <div class="px-4 py-2 bg-white border-b border-gray-100">
-      <div class="flex gap-2">
-        <van-button
-          size="small"
-          plain
-          round
-          @click="showFilterBeginTimePicker = true"
+    <!-- 筛选标签显示 -->
+    <div v-if="hasActiveFilters" class="px-4 py-2 bg-white border-b border-gray-100">
+      <div class="flex flex-wrap gap-2">
+        <van-tag
+          v-if="filters.PlaceId !== 0"
+          closeable
+          type="primary"
+          @close="filters.PlaceId = 0; onRefresh()"
         >
-          {{ filterBeginTime || "开始日期" }}
-        </van-button>
-        <van-button
-          size="small"
-          plain
-          round
-          @click="showFilterEndTimePicker = true"
+          场地已选
+        </van-tag>
+        <van-tag
+          v-if="filters.ServiceType !== 0"
+          closeable
+          type="primary"
+          @close="filters.ServiceType = 0; onRefresh()"
         >
-          {{ filterEndTime || "结束日期" }}
-        </van-button>
+          服务类型已选
+        </van-tag>
+        <van-tag
+          v-if="filters.CanBook !== 0"
+          closeable
+          type="primary"
+          @close="filters.CanBook = 0; onRefresh()"
+        >
+          {{ filters.CanBook === 1 ? '预约活动' : filters.CanBook === 2 ? '常规活动' : '团队活动' }}
+        </van-tag>
+        <van-tag
+          v-if="filters.BeginTime"
+          closeable
+          type="primary"
+          @close="filters.BeginTime = ''; onRefresh()"
+        >
+          开始: {{ filters.BeginTime }}
+        </van-tag>
+        <van-tag
+          v-if="filters.EndTime"
+          closeable
+          type="primary"
+          @close="filters.EndTime = ''; onRefresh()"
+        >
+          结束: {{ filters.EndTime }}
+        </van-tag>
       </div>
     </div>
 
@@ -296,24 +356,13 @@ export default {
       </van-list>
     </van-pull-refresh>
 
-    <!-- 日期选择器 -->
-    <van-popup v-model:show="showFilterBeginTimePicker" position="bottom" round>
-      <van-date-picker
-        v-model="filterBeginTimeArray"
-        title="选择开始日期"
-        @confirm="handleFilterBeginTimeConfirm"
-        @cancel="showFilterBeginTimePicker = false"
-      />
-    </van-popup>
-
-    <van-popup v-model:show="showFilterEndTimePicker" position="bottom" round>
-      <van-date-picker
-        v-model="filterEndTimeArray"
-        title="选择结束日期"
-        @confirm="handleFilterEndTimeConfirm"
-        @cancel="showFilterEndTimePicker = false"
-      />
-    </van-popup>
+    <!-- 筛选弹窗 -->
+    <FilterDialog
+      v-model:show="showFilterDialog"
+      :filters="filters"
+      @confirm="handleFilterConfirm"
+      @reset="handleFilterReset"
+    />
 
     <!-- 新增/编辑/查看活动排期弹窗 -->
     <ActivityFormDialog

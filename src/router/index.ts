@@ -42,17 +42,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import("@/pages/home/index.vue"),
     name: "Home",
     meta: {
-      title: "首页",
-      layout: {
-        navBar: {
-          showNavBar: false,
-          showLeftArrow: false
-        },
-        tabbar: {
-          showTabbar: true,
-          icon: "home-o"
-        }
-      }
+      title: "首页"
     }
   },
   {
@@ -60,17 +50,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import("@/pages/activity/list/index.vue"),
     name: "ActivityList",
     meta: {
-      title: "活动列表",
-      layout: {
-        navBar: {
-          showNavBar: false,
-          showLeftArrow: false
-        },
-        tabbar: {
-          showTabbar: true,
-          icon: "home-o"
-        }
-      }
+      title: "活动列表"
     }
   }
 ]
