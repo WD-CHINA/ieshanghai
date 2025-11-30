@@ -54,6 +54,24 @@ export const routes: RouteRecordRaw[] = [
         }
       }
     }
+  },
+  {
+    path: "/activity/list",
+    component: () => import("@/pages/activity/list/index.vue"),
+    name: "ActivityList",
+    meta: {
+      title: "活动列表",
+      layout: {
+        navBar: {
+          showNavBar: false,
+          showLeftArrow: false
+        },
+        tabbar: {
+          showTabbar: true,
+          icon: "home-o"
+        }
+      }
+    }
   }
 ]
 
