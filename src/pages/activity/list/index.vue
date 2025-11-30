@@ -189,7 +189,11 @@ export default {
 </script>
 
 <template>
-  <div class="activity-list-page min-h-screen bg-gray-50">
+  <div
+    un-min-h-screen
+    un-bg-gray-50
+    un-pb="[env(safe-area-inset-bottom)]"
+  >
     <!-- 导航栏 -->
     <van-nav-bar
       title="活动排期"
@@ -199,11 +203,11 @@ export default {
       @click-left="router.back()"
     >
       <template #right>
-        <div class="flex items-center gap-3">
+        <div un-flex un-items-center un-gap-3>
           <van-icon
             name="filter-o"
             size="20"
-            :class="{ 'text-blue-500': hasActiveFilters }"
+            :un-text-blue-500="hasActiveFilters"
             @click="openFilterDialog"
           />
           <van-icon
@@ -216,7 +220,7 @@ export default {
     </van-nav-bar>
 
     <!-- 搜索栏 -->
-    <div class="px-4 pt-4 pb-2 bg-white">
+    <div un-px-4 un-pt-4 un-pb-2 un-bg-white>
       <van-search
         v-model="keyword"
         placeholder="搜索活动名称"
@@ -226,8 +230,15 @@ export default {
     </div>
 
     <!-- 筛选标签显示 -->
-    <div v-if="hasActiveFilters" class="px-4 py-2 bg-white border-b border-gray-100">
-      <div class="flex flex-wrap gap-2">
+    <div
+      v-if="hasActiveFilters"
+      un-px-4
+      un-py-2
+      un-bg-white
+      un-border-b
+      un-border-gray-100
+    >
+      <div un-flex un-flex-wrap un-gap-2>
         <van-tag
           v-if="filters.PlaceId !== 0"
           closeable
@@ -279,20 +290,23 @@ export default {
         finished-text="没有更多了"
         @load="onLoad"
       >
-        <div class="px-4 py-2 space-y-3">
+        <div un-px-4 un-py-2 un-space-y-3>
           <div
             v-for="item in list"
             :key="item.Id"
-            class="bg-white rounded-xl p-4 shadow-sm"
+            un-bg-white
+            un-rounded-xl
+            un-p-4
+            un-shadow-sm
             @click="handleDetail(item)"
           >
             <!-- 头部：活动名称和状态 -->
-            <div class="flex items-start justify-between mb-3">
-              <div class="flex-1">
-                <h3 class="text-base font-bold text-gray-800 mb-1">
+            <div un-flex un-items-start un-justify-between un-mb-3>
+              <div un-flex-1>
+                <h3 un-text-base un-font-bold un-text-gray-800 un-mb-1>
                   {{ item.ActName }}
                 </h3>
-                <div class="text-sm text-gray-500">
+                <div un-text-sm un-text-gray-500>
                   {{ item.PlaceName }}
                 </div>
               </div>
@@ -306,23 +320,27 @@ export default {
             </div>
 
             <!-- 活动信息 -->
-            <div class="space-y-1.5 text-sm text-gray-600 mb-3">
-              <div class="flex items-center">
-                <van-icon name="clock-o" class="mr-1.5" />
+            <div un-space-y="1.5" un-text-sm un-text-gray-600 un-mb-3>
+              <div un-flex un-items-center>
+                <van-icon name="clock-o" un-mr="1.5" />
                 <span>{{ item.ActTime }}</span>
               </div>
-              <div class="flex items-center">
-                <van-icon name="location-o" class="mr-1.5" />
+              <div un-flex un-items-center>
+                <van-icon name="location-o" un-mr="1.5" />
                 <span>{{ item.ServiceTypeName }}</span>
               </div>
-              <div v-if="item.CanBook === 1" class="flex items-center">
-                <van-icon name="friends-o" class="mr-1.5" />
+              <div
+                v-if="item.CanBook === 1"
+                un-flex
+                un-items-center
+              >
+                <van-icon name="friends-o" un-mr="1.5" />
                 <span>已预约: {{ item.BookedQty }} / {{ item.CanBookQty }}</span>
               </div>
             </div>
 
             <!-- 操作按钮 -->
-            <div class="flex gap-2 pt-3 border-t border-gray-100">
+            <div un-flex un-gap-2 un-pt-3 un-border-t un-border-gray-100>
               <van-button
                 v-if="canEdit(item)"
                 size="small"
@@ -350,7 +368,7 @@ export default {
           <van-empty
             v-if="!loading && list.length === 0"
             description="暂无活动排期"
-            class="py-10"
+            un-py-10
           />
         </div>
       </van-list>
@@ -374,9 +392,3 @@ export default {
     />
   </div>
 </template>
-
-<style scoped>
-.activity-list-page {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-</style>
