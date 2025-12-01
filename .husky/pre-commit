@@ -1,0 +1,2 @@
+# 执行 lint-staged 中配置的任务
+npx lint-staged
