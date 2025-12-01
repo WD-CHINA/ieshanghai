@@ -2,7 +2,6 @@
 import type { ActivityItem } from "./apis/type"
 import { getActivityStatusTagType } from "@@/utils/vant-helper"
 import dayjs from "dayjs"
-import { showToast } from "vant"
 import { getActivityListApi } from "./apis"
 import ActivityFormDialog from "./components/ActivityFormDialog.vue"
 import FilterDialog from "./components/FilterDialog.vue"

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getBookingStatusTagType } from "@@/utils/vant-helper"
-import { showDialog, showToast } from "vant"
 
 const router = useRouter()
 

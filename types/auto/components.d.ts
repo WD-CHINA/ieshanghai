@@ -14,7 +14,6 @@ declare module 'vue' {
     VanCell: typeof import('vant/es')['Cell']
     VanConfigProvider: typeof import('vant/es')['ConfigProvider']
     VanDatePicker: typeof import('vant/es')['DatePicker']
-    VanDatetimePicker: typeof import('vant/es')['DatetimePicker']
     VanEmpty: typeof import('vant/es')['Empty']
     VanField: typeof import('vant/es')['Field']
     VanForm: typeof import('vant/es')['Form']
@@ -27,6 +26,7 @@ declare module 'vue' {
     VanSearch: typeof import('vant/es')['Search']
     VanTabbar: typeof import('vant/es')['Tabbar']
     VanTabbarItem: typeof import('vant/es')['TabbarItem']
-    VanTag: typeof import('vant/es')['Tag']
+    VanTag: typeof import('vant/es')['Tag'],
+    VanUploader: typeof import('vant/es')['Uploader'],
   }
 }
