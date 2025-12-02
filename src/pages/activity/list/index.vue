@@ -14,7 +14,7 @@ const refreshing = ref(false)
 const finished = ref(false)
 const list = ref<ActivityItem[]>([])
 const page = ref(1)
-const limit = 20
+const limit = 10
 
 // 筛选条件
 const keyword = ref("")
@@ -48,7 +48,7 @@ const hasActiveFilters = computed(() => {
 
 // 获取活动列表
 async function fetchActivityList(reset = false) {
-  if (loading.value) return
+  // if (loading.value) return
 
   try {
     loading.value = true
@@ -76,6 +76,7 @@ async function fetchActivityList(reset = false) {
         list.value = Data.list || []
       } else {
         list.value.push(...(Data.list || []))
+        console.log(list.value)
       }
 
       if (Data.list && Data.list.length < limit) {
@@ -102,6 +103,7 @@ async function onRefresh() {
 
 // 加载更多
 function onLoad() {
+  console.log(111)
   fetchActivityList()
 }
 

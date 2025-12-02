@@ -383,9 +383,9 @@ watch([() => formData.BeginTime, () => formData.EndTime], () => {
 <template>
   <van-popup
     v-model:show="showDialog"
-    position="bottom"
-    :style="{ height: '90%' }"
-    round
+    position="right"
+    :style="{ height: '100%', width: '100%' }"
+    :duration="0.3"
     closeable
     close-icon-position="top-right"
   >
@@ -422,6 +422,7 @@ watch([() => formData.BeginTime, () => formData.EndTime], () => {
             required
             readonly
             is-link
+            :rules="[{ required: true, message: '请选择场地' }]"
             :disabled="isViewMode"
             @click="!isViewMode && (showPlacePicker = true)"
           />

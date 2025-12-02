@@ -201,9 +201,9 @@ export default {
 <template>
   <van-popup
     v-model:show="showDialog"
-    position="bottom"
-    :style="{ height: '80%' }"
-    round
+    position="right"
+    :style="{ height: '100%', width: '100%' }"
+    :duration="0.3"
     closeable
     close-icon-position="top-right"
   >

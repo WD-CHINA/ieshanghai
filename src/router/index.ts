@@ -50,7 +50,15 @@ export const routes: RouteRecordRaw[] = [
     component: () => import("@/pages/activity/list/index.vue"),
     name: "ActivityList",
     meta: {
-      title: "活动列表"
+      title: "活动列表",
+    }
+  },
+  {
+    path: "/activity/booking",
+    component: () => import("@/pages/activity/booking/index.vue"),
+    name: "ActivityBooking",
+    meta: {
+      title: "预约情况",
     }
   }
 ]

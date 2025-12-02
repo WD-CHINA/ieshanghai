@@ -9,6 +9,7 @@ import AutoImport from "unplugin-auto-import/vite"
 import Components from "unplugin-vue-components/vite"
 import { defineConfig, loadEnv } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
+import vueDevTools from "vite-plugin-vue-devtools"
 import svgLoader from "vite-svg-loader"
 
 // Configuring Vite: https://cn.vite.dev/config
@@ -100,6 +101,7 @@ export default defineConfig(({ mode }) => {
     // 插件配置
     plugins: [
       vue(),
+      vueDevTools(),
       // 为打包后的文件提供传统浏览器兼容性支持，配置继承自 browserslist
       legacy(),
       // 支持将 SVG 文件导入为 Vue 组件

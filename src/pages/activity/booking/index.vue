@@ -1,53 +1,22 @@
+```vue
 <script setup lang="ts">
+import type { BookingItem } from "./apis/type"
 import { getBookingStatusTagType } from "@@/utils/vant-helper"
+import { approveBookingApi, getBookingListApi } from "./apis"
 
 const router = useRouter()
+const route = useRoute()
 
-// 预约列表数据
-interface BookingItem {
-  Id: number
-  ContactName: string
-  ContactPhone: string
-  BookQty: number
-  BookTime: string
-  BookRemark: string
-  Status: number // 0-待审核, 1-已通过, 2-已拒绝, 3-已签到, 4-未参加
-  StatusName: string
-}
+// 获取活动ID
+const activityId = computed(() => Number(route.query.activityId) || 0)
 
+// 列表数据
 const loading = ref(false)
-const list = ref<BookingItem[]>([
-  {
-    Id: 1,
-    ContactName: "张三",
-    ContactPhone: "138****1234",
-    BookQty: 2,
-    BookTime: "2025-11-25 10:30:00",
-    BookRemark: "带小孩参加",
-    Status: 0,
-    StatusName: "待审核"
-  },
-  {
-    Id: 2,
-    ContactName: "李四",
-    ContactPhone: "139****5678",
-    BookQty: 1,
-    BookTime: "2025-11-25 11:00:00",
-    BookRemark: "",
-    Status: 1,
-    StatusName: "已通过"
-  },
-  {
-    Id: 3,
-    ContactName: "王五",
-    ContactPhone: "136****9012",
-    BookQty: 3,
-    BookTime: "2025-11-25 09:45:00",
-    BookRemark: "预约全家参加",
-    Status: 1,
-    StatusName: "已通过"
-  }
-])
+const refreshing = ref(false)
+const finished = ref(false)
+const list = ref<BookingItem[]>([])
+const page = ref(1)
+const limit = 10
 
 // 当前选中的预约
 const selectedBooking = ref<BookingItem>()
@@ -80,9 +49,18 @@ async function handleApprove(approved: boolean) {
     message: `确定${approved ? "通过" : "拒绝"}该预约申请吗？`,
     showCancelButton: true
   }).then(async () => {
-    showToast("审核成功")
-    // TODO: 调用审核接口
-    showDetail.value = false
+    try {
+      await approveBookingApi({
+        Id: selectedBooking.value!.Id,
+        Action: approved ? 1 : 2
+      })
+      showToast("审核成功")
+      showDetail.value = false
+      // 刷新列表
+      onRefresh()
+    } catch (error: any) {
+      showToast(error.Message || "审核失败")
+    }
   }).catch(() => {
     // 取消
   })
@@ -93,17 +71,65 @@ function handleBack() {
   router.back()
 }
 
-// 加载数据
-async function fetchData() {
-  loading.value = true
-  // TODO: 调用接口获取预约列表
-  // const res = await getActivityBookingListApi({ ActivityId: activityId.value })
-  // list.value = res.Data?.list || []
-  loading.value = false
+// 获取预约列表
+async function fetchBookingList(reset = false) {
+  if (loading.value || !activityId.value) return
+
+  try {
+    loading.value = true
+    if (reset) {
+      page.value = 1
+      list.value = []
+      finished.value = false
+    }
+
+    const { Data } = await getBookingListApi({
+      ActivityId: activityId.value,
+      page: page.value,
+      limit
+    })
+
+    if (Data) {
+      if (reset) {
+        list.value = Data.list || []
+      } else {
+        list.value.push(...(Data.list || []))
+      }
+
+      if (Data.list && Data.list.length < limit) {
+        finished.value = true
+      } else {
+        page.value++
+      }
+    }
+  } catch (error: any) {
+    console.error("获取预约列表失败", error)
+    showToast(error.Message || "获取预约列表失败")
+    finished.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+// 下拉刷新
+async function onRefresh() {
+  refreshing.value = true
+  await fetchBookingList(true)
+  refreshing.value = false
+}
+
+// 加载更多
+function onLoad() {
+  fetchBookingList()
 }
 
 onMounted(() => {
-  fetchData()
+  if (!activityId.value) {
+    showToast("缺少活动ID")
+    router.back()
+    return
+  }
+  onRefresh()
 })
 </script>
 
@@ -149,77 +175,88 @@ onMounted(() => {
     </div>
 
     <!-- 预约列表 -->
-    <div class="mx-4 mt-4 space-y-3 pb-4">
-      <div
-        v-for="item in list"
-        :key="item.Id"
-        class="bg-white rounded-xl p-4 shadow-sm"
-        @click="handleItemClick(item)"
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+      <van-list
+        v-model:loading="loading"
+        :finished="finished"
+        finished-text="没有更多了"
+        @load="onLoad"
       >
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex-1">
-            <div class="flex items-center mb-1">
-              <van-icon name="contact" class="mr-1.5 text-gray-400" />
-              <span class="text-base font-bold text-gray-800">{{ item.ContactName }}</span>
-            </div>
-            <div class="text-sm text-gray-600">
-              {{ item.ContactPhone }}
-            </div>
-          </div>
-          <van-tag
-            :type="getStatusType(item.Status)"
-            size="medium"
-            round
+        <div class="mx-4 mt-4 space-y-3 pb-4">
+          <div
+            v-for="item in list"
+            :key="item.Id"
+            class="bg-white rounded-xl p-4 shadow-sm"
+            @click="handleItemClick(item)"
           >
-            {{ item.StatusName }}
-          </van-tag>
-        </div>
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <div class="flex items-center mb-1">
+                  <van-icon name="contact" class="mr-1.5 text-gray-400" />
+                  <span class="text-base font-bold text-gray-800">{{ item.ContactName }}</span>
+                </div>
+                <div class="text-sm text-gray-600">
+                  {{ item.ContactPhone }}
+                </div>
+              </div>
+              <van-tag
+                :type="getStatusType(item.Status)"
+                size="medium"
+                round
+              >
+                {{ item.StatusName }}
+              </van-tag>
+            </div>
 
-        <div class="space-y-1.5 text-sm text-gray-600">
-          <div class="flex items-center">
-            <van-icon name="clock-o" class="mr-1.5" />
-            <span>预约时间: {{ item.BookTime }}</span>
+            <div class="space-y-1.5 text-sm text-gray-600">
+              <div class="flex items-center">
+                <van-icon name="clock-o" class="mr-1.5" />
+                <span>预约时间: {{ item.BookTime }}</span>
+              </div>
+
+              <div class="flex items-center">
+                <van-icon name="friends-o" class="mr-1.5" />
+                <span>预约人数: {{ item.BookQty }} 人</span>
+              </div>
+
+              <div v-if="item.BookRemark" class="flex items-start">
+                <van-icon name="comment-o" class="mr-1.5 mt-0.5" />
+                <span class="flex-1">备注: {{ item.BookRemark }}</span>
+              </div>
+            </div>
+
+            <div v-if="item.Status === 0" class="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+              <van-button
+                size="small"
+                type="success"
+                plain
+                round
+                block
+                @click.stop="handleItemClick(item)"
+              >
+                立即审核
+              </van-button>
+            </div>
           </div>
 
-          <div class="flex items-center">
-            <van-icon name="friends-o" class="mr-1.5" />
-            <span>预约人数: {{ item.BookQty }} 人</span>
-          </div>
-
-          <div v-if="item.BookRemark" class="flex items-start">
-            <van-icon name="comment-o" class="mr-1.5 mt-0.5" />
-            <span class="flex-1">备注: {{ item.BookRemark }}</span>
-          </div>
+          <!-- 空状态 -->
+          <van-empty
+            v-if="!loading && list.length === 0"
+            description="暂无预约记录"
+            class="py-10"
+          />
         </div>
-
-        <div v-if="item.Status === 0" class="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-          <van-button
-            size="small"
-            type="success"
-            plain
-            round
-            block
-            @click.stop="handleItemClick(item)"
-          >
-            立即审核
-          </van-button>
-        </div>
-      </div>
-
-      <!-- 空状态 -->
-      <van-empty
-        v-if="!loading && list.length === 0"
-        description="暂无预约记录"
-        class="py-10"
-      />
-    </div>
+      </van-list>
+    </van-pull-refresh>
 
     <!-- 预约详情弹窗 -->
     <van-popup
       v-model:show="showDetail"
-      round
-      position="bottom"
-      :style="{ maxHeight: '80%' }"
+      position="right"
+      :style="{ height: '100%', width: '100%' }"
+      :duration="0.3"
+      closeable
+      close-icon-position="top-right"
     >
       <div v-if="selectedBooking" class="p-6">
         <div class="text-center mb-6">
